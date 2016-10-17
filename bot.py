@@ -1,11 +1,5 @@
 import os
-
-import requests
-from requests_oauthlib import OAuth1
-
 import tweepy
-
-import json
 
 consumer_key = os.environ['SINE_CONSUMER_KEY']
 consumer_secret = os.environ['SINE_CONSUMER_SECRET']
@@ -64,9 +58,9 @@ class StreamListener(tweepy.StreamListener):
         self.me = self.api.me()
     def on_status(self, status):
         if "死ね" in status.text:
-            print("==============")
+            print("====================")
             print(status.user.name)
-            print("--------------")
+            print("--------------------")
             print(status.text)
 
     def on_event(self, event):
