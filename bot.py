@@ -1,6 +1,13 @@
 import os
 import tweepy
 
+from logging import getLogger,StreamHandler,DEBUG
+logger = getLogger(__name__)
+handler = StreamHandler()
+handler.setLevel(DEBUG)
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
+
 consumer_key = os.environ['SINE_CONSUMER_KEY']
 consumer_secret = os.environ['SINE_CONSUMER_SECRET']
 access_token = os.environ['SINE_ACCESS_KEY']
@@ -18,6 +25,7 @@ class StreamListener(tweepy.StreamListener):
         if not status.retweeted:
             if search in status.text:
                 # print(status)
+                logger.info("sine")    
                 print("============================================================")
                 print(status.user.name, "@"+status.user.screen_name)
                 print("------------------------------------------------------------")
@@ -37,6 +45,8 @@ class StreamListener(tweepy.StreamListener):
             return False
 
 if __name__ == "__main__":
+    print("hello")
+    logger.info("hello")
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_secret)
     api = tweepy.API(auth)
@@ -47,3 +57,4 @@ if __name__ == "__main__":
     u_stream.userstream(track=search)
     # f_stream.filter(track=search, async=True)
     print("yeah")
+    logger.info("yeah")
