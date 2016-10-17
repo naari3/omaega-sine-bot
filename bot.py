@@ -3,6 +3,8 @@ import os
 import requests
 from requests_oauthlib import OAuth1
 
+import tweepy
+
 import json
 
 consumer_key = os.environ['SINE_CONSUMER_KEY']
@@ -55,44 +57,42 @@ class DotAccessible(object): # http://d.hatena.ne.jp/karasuyamatengu/20120408/13
             return self.__class__(v)
         return v
 
-filter_url = "https://stream.twitter.com/1.1/statuses/filter.json"
-user_url = "https://userstream.twitter.com/1.1/user.json"
+class StreamListener(tweepy.StreamListener):
+    def __init__(self, api):
+        super().__init__()
+        self.api = api
+        self.me = self.api.me()
+    def on_status(self, status):
+        if "死ね" in status.text:
+            print("==============")
+            print(status.user.name)
+            print("--------------")
+            print(status.text)
 
-auth = OAuth1(consumer_key, consumer_secret, access_token, access_secret)
+    def on_event(self, event):
+        if event.event == 'follow':
+            source_user = event.source
+            if self.me.id != source_user["id"]:
+                print("followed by {} {}".format(source_user["name"], source_user["id"]))
+                event._api.create_friendship(source_user["id"])
+                print("followed {} {}".format(source_user["name"], source_user["id"]))
+        # if event.event == 'unfollow':
+        #     target_user = event.target
+        #     print("unfollowed by {} {}".format(target_user["name"], target_user["id"]))
+        #     event._api.destroy_friendship(target_user["id"])
+        #     print("unfollowed {} {}".format(target_user["name"], target_user["id"]))
 
-f_r = requests.post(filter_url, auth=auth, stream=True, data={"track":"死ね"})
-u_r = requests.post(user_url, auth=auth, stream=True, data={"track":"死ね"})
+    def on_error(self, status_code):
+        if status_code == 420:
+            print(str(status_code))
+            return False
 
-# for line in f_r.iter_lines():
-#     if line == b'':
-#         continue
-#     tw = json.loads(line.decode('utf-8'))
-#     # print(tw)
-#     tweet = DotAccessible(tw)
-#     if not tweet.retweeted:
-#         print("==============================")
-#         print(tweet.user.name)
-#         print("------------------------------")
-#         print(tweet.text)
+if __name__ == "__main__":
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_secret)
+    api = tweepy.API(auth)
 
-for line in u_r.iter_lines():
-    if line == b'':
-        continue
-    tw = json.loads(line.decode('utf-8'))
-    if tw.get("friends", None):
-        continue
-    if tw.get("delete", None):
-        continue
-    tweet = DotAccessible(tw)
+    stream = tweepy.Stream(auth=api.auth, listener=StreamListener(api))
 
-    if tw.get("event", None):
-        print("==============================")
-        print("¥¥¥¥¥¥¥¥¥¥¥¥")
-        print(tweet)
-        continue
-    if not tweet.retweeted:
-        print("==============================")
-        print(tweet.user.name)
-        print("------------------------------")
-        print(tweet.text)
-        continue
+    stream.userstream(track=[u'死ね'])
+    print("yeah")
