@@ -14,9 +14,9 @@ consumer_secret = os.environ['SINE_CONSUMER_SECRET']
 access_token = os.environ['SINE_ACCESS_KEY']
 access_secret = os.environ['SINE_ACCESS_SECRET']
 
-omaega_sine = "@{} お前が死ね"
-query = "死ね"
-ng_words = ["RT", "死ねない"]
+omaega_sine = "@{} たしかに"
+query = "だと思う"
+ng_words = ["RT"]
 ng_names = ["bot", "BOT", "Bot"]
 
 class FollowStreamListener(tweepy.StreamListener):
